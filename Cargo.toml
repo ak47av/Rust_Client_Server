@@ -3,6 +3,10 @@ name = "tcpexample"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "tcpexample"
+path = "src/lib.rs"
+
 [[bin]]
 name = "tcplistener"
 path = "src/bin/tcplistener.rs"

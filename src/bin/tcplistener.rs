@@ -2,25 +2,20 @@ use std::net::{TcpListener, TcpStream, Shutdown};
 use std::io::{Write, Read};
 use std::str;
 use std::thread;
+use tcpexample::ThreadedConnectionHandler::ThreadedConnectionHandler;
 
-fn handle_client(mut stream: TcpStream, conn_no: &mut u8) {
+fn handle_client(stream: TcpStream, conn_no: &mut u8) {
     println!("A Client connected! Issued no: {}", conn_no);
     *conn_no += 1;
-    thread::spawn(move || {
-        let mut buf = [0; 10];
-        stream.read(&mut buf);
-        match str::from_utf8(&buf) {
-            Ok(x) => println!("Client said: {}", x),
-            Err(err) => println!("ERROR")
-        }
-        stream.shutdown(Shutdown::Both).expect("shutdown call failed");
-    });
+    let mut tch = ThreadedConnectionHandler::new(stream);
+    tch.run();
 }
 
 fn main() -> std::io::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:34254")?;
 
     let mut connection_number = 1;
+    println!("Listening for a connection..");
 
     for stream in listener.incoming() {
         handle_client(stream?, &mut connection_number);
