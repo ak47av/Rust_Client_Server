@@ -3,6 +3,7 @@ use std::net::{TcpListener, TcpStream, Shutdown};
 use std::io::{Write, Read};
 use std::str;
 use std::error::Error;
+use crate::Communication::Communication;
 
 pub struct ThreadedConnectionHandler {
     stream: TcpStream,
@@ -18,31 +19,13 @@ impl ThreadedConnectionHandler {
         });
     }
 
-    pub fn receive(&mut self) -> Result<(), Box<dyn Error>> {
-        let mut buffer = [0u8; 100];
-        let bytes_received = self.stream.read(&mut buffer);
-
-        let deserialized: [u8; 100] = bincode::decode_from_slice(&mut buffer, bincode::config::standard())?.0;
-        match str::from_utf8(&deserialized) {
-            Ok(x) => println!("Received Object: {}", x),
-            Err(err) => println!("Error with received object")
-        }
-        Ok(())
-    }
-
     fn readCommand(&mut self) -> bool {
-        // let mut buf = [0; 50];
-        // self.stream.read(&mut buf);
-        // match str::from_utf8(&mut buf) {
-        //     Ok(x) => {
-        //         let trimmed = x.trim_matches(char::from(0)).trim();
-        //         if !trimmed.is_empty() {
-        //             println!("Received a String object from the client ({}).", trimmed);
-        //         }
-        //     },
-        //     Err(_) => { self.closeStream(); return false;}
-        // }
-        self.receive();
+        let mut buffer = [0u8; 100];
+        let bytes = self.receive(&mut buffer).unwrap();
+        if bytes > 0 {
+            let decoded: String = ThreadedConnectionHandler::decode(bytes, &mut buffer).unwrap();
+            println!("Got command: {}", decoded);
+        }
         true
     }
 
@@ -50,4 +33,16 @@ impl ThreadedConnectionHandler {
         self.stream.shutdown(Shutdown::Both).expect("shutdown call failed");
     }
 
+}
+
+impl Communication for ThreadedConnectionHandler {
+    fn send(&mut self, buf: &mut[u8]) -> Result<(), Box<dyn Error>>{
+        self.stream.write(buf)?;
+        Ok(())
+    }
+
+    fn receive(&mut self, buf: &mut[u8]) -> Result<usize, Box<dyn Error>> {
+        let bytes_received = self.stream.read(buf)?;
+        Ok(bytes_received)
+    }
 }

@@ -1,8 +1,11 @@
 use std::net::{TcpStream};
 use std::error::Error;
 use std::io::{Read, Write};
-use crate::DateTimeService;
 use std::str;
+
+
+use crate::DateTimeService;
+use crate::Communication::Communication;
 
 pub struct Client {
     stream: TcpStream,
@@ -23,38 +26,27 @@ impl Client {
         Ok(Self{stream: st})
     }
 
-    fn getDate(&mut self) {
+    pub fn getDate(&mut self) {
         let theDateCommand = String::from("GetDate");
         println!("01. -? Sending Command {} to the server..", theDateCommand);
         // Send the Date Command
-        //self.send(theDateCommand);
-
-        // Receive the Date and time
-        
-    }
-
-    pub fn send(&mut self, object: &impl bincode::Encode) -> Result<(), Box<dyn Error>>{
-        println!("02. -> Sending an object...");
-        let mut buffer = [0u8; 50];
-        let mut bytes = bincode::encode_into_slice(
-            object,
-            &mut buffer,
-            bincode::config::standard()
-        )?;
-        self.stream.write(&mut buffer[..bytes])?;
-        Ok(())
-    }
-
-    pub fn receive(&mut self) -> Result<(), Box<dyn Error>> {
         let mut buffer = [0u8; 100];
-        let bytes_received = self.stream.read(&mut buffer);
-
-        let deserialized: [u8; 100] = bincode::decode_from_slice(&mut buffer, bincode::config::standard())?.0;
-        match str::from_utf8(&deserialized) {
-            Ok(x) => println!("Received Object: {}", x),
-            Err(err) => println!("Error with received object")
-        }
-        Ok(())
+        let length = Client::encode(theDateCommand, &mut buffer);
+        self.send(&mut buffer);
+        // Receive the Date and time
     }
 
 }
+
+impl Communication for Client {
+    fn send(&mut self, buf: &mut[u8]) -> Result<(), Box<dyn Error>>{
+        let bytes = self.stream.write(buf)?;
+        Ok(())
+    }
+
+    fn receive(&mut self, buf: &mut[u8]) -> Result<usize, Box<dyn Error>> {
+        let bytes_received = self.stream.read(buf)?;
+        Ok(bytes_received)
+    }
+}
+

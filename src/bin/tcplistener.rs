@@ -1,7 +1,4 @@
-use std::net::{TcpListener, TcpStream, Shutdown};
-use std::io::{Write, Read};
-use std::str;
-use std::thread;
+use std::net::{TcpListener, TcpStream};
 use tcpexample::ThreadedConnectionHandler::ThreadedConnectionHandler;
 
 fn handle_client(stream: TcpStream, conn_no: &mut u8) {
