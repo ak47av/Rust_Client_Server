@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local};
+use chrono::{Local};
 
 
 pub fn getDateAndTime() -> String {
