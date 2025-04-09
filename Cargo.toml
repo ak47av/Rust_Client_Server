@@ -17,4 +17,5 @@ path = "src/bin/tcpsender.rs"
 
 
 [dependencies]
+bincode = "2.0.1"
 chrono = "0.4.40"
