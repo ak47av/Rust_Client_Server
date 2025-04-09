@@ -6,9 +6,9 @@ use tcpexample::ThreadedConnectionHandler::ThreadedConnectionHandler;
 
 fn handle_client(stream: TcpStream, conn_no: &mut u8) {
     println!("A Client connected! Issued no: {}", conn_no);
+    ThreadedConnectionHandler::new(stream, *conn_no);
     *conn_no += 1;
-    let mut tch = ThreadedConnectionHandler::new(stream);
-    tch.run();
+    //tch.run();
 }
 
 fn main() -> std::io::Result<()> {

@@ -19,7 +19,6 @@ impl Client {
         let localAddr = st.local_addr()?;
         let localAddrString = localAddr.to_string();
         println!("00. => From local: {}", localAddrString);
-        st.write(b"Hello Server!")?;
         Ok(Self{stream: st})
     }
 
