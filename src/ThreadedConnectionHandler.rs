@@ -5,25 +5,16 @@ use std::str;
 
 pub struct ThreadedConnectionHandler {
     stream: TcpStream,
+    connection_number: u8
 }
 
 impl ThreadedConnectionHandler {
 
-    pub fn new (stream: TcpStream) -> Self {
-        Self { stream }
-    }
-
-    pub fn run(&mut self) {
-        thread::scope(|s| {
-            s.spawn(|| {
-                let mut buf = [0; 50];
-                self.stream.read(&mut buf);
-                match str::from_utf8(&buf) {
-                    Ok(x) => println!("Client said: {}", x),
-                    Err(err) => println!("ERROR")
-                }
-                while self.readCommand() {}
-            });
+    pub fn new (stream: TcpStream, connection_number: u8) {
+        let mut instance = ThreadedConnectionHandler{stream, connection_number};
+        thread::spawn(move || {
+            println!("Thread:{} Running!!!!", connection_number);
+            instance.readCommand();
         });
     }
 
