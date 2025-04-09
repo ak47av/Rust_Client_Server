@@ -1,6 +1,7 @@
 use std::net::{TcpStream};
 use std::error::Error;
 use std::io::{Read, Write};
+use crate::DateTimeService;
 
 pub struct Client {
     stream: TcpStream,
@@ -20,6 +21,16 @@ impl Client {
         println!("00. => From local: {}", localAddrString);
         st.write(b"Hello Server!")?;
         Ok(Self{stream: st})
+    }
+
+    fn getDate(&mut self) {
+        let theDateCommand = String::from("GetDate");
+        println!("01. -? Sending Command {} to the server..", theDateCommand);
+        // Send the Date Command
+        //self.send(theDateCommand);
+
+        // Receive the Date and time
+        
     }
 
 }
