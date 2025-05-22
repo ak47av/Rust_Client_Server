@@ -1,9 +1,8 @@
+#![allow(non_snake_case)]
 use std::net::{TcpStream};
 use std::error::Error;
 use std::io::{Read, Write};
-use std::str;
 
-use crate::DateTimeService;
 use crate::Communication::Communication;
 
 pub struct Client {
@@ -18,7 +17,7 @@ impl Client {
         let serverAddr = format!("{}:{}", serverIP, portNumber);
 
         // Connect to the server
-        let mut st = TcpStream::connect(serverAddr)?;
+        let st = TcpStream::connect(serverAddr)?;
 
         // Get the address of the server
         let peerAddr = st.peer_addr()?;
@@ -35,13 +34,24 @@ impl Client {
 
     // Send a date command to the server 
     pub fn getDate(&mut self) {
-        let theDateCommand = String::from("GetDate");
-        println!("01. -? Sending Command {} to the server..", theDateCommand);
         // Send the Date Command
+        let theDateCommand = String::from("GetDate");
+        println!("01. -> Sending Command {} to the server..", theDateCommand);
+
+        // Create a buffer, encode the message in the buffer and send it over the stream
         let mut buffer = [0u8; 100];
-        let length = Client::encode(theDateCommand, &mut buffer);
-        self.send(&mut buffer);
+        let _length = Client::encode(theDateCommand, &mut buffer);
+        let _ = self.send(&mut buffer);
+
         // Receive the Date and time
+        let mut buffer = [0u8; 100];
+        let bytes = self.receive(&mut buffer).unwrap();
+
+        // If something was received from the stream, decode it and print the command
+        if bytes > 0 {
+            let decoded: String = Client::decode(bytes, &mut buffer).unwrap();
+            println!("Received date from the server: {}", decoded);
+        }
     }
 
 }
@@ -50,7 +60,7 @@ impl Client {
 impl Communication for Client {
     // send contents of the buffer over the stream
     fn send(&mut self, buf: &mut[u8]) -> Result<(), Box<dyn Error>>{
-        let bytes = self.stream.write(buf)?;
+        let _bytes = self.stream.write(buf)?;
         Ok(())
     }
 

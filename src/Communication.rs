@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use std::error::Error;
 use bincode;
 
@@ -15,7 +16,7 @@ pub trait Communication {
 
     // encode the contents of the object as bytes into the buffer
     fn encode <T:bincode::Encode> (object: T, buf: &mut[u8]) -> Result<usize, Box<dyn Error>> {
-        let mut bytes = bincode::encode_into_slice(
+        let bytes = bincode::encode_into_slice(
             object,
             buf,
             bincode::config::standard()

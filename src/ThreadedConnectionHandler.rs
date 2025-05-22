@@ -1,10 +1,11 @@
+#![allow(non_snake_case)]
 use std::thread;
-use std::net::{TcpListener, TcpStream, Shutdown};
+use std::net::{TcpStream, Shutdown};
 use std::io::{Write, Read};
-use std::str;
 use std::error::Error;
 
 use crate::Communication::Communication;
+use crate::DateTimeService;
 
 pub struct ThreadedConnectionHandler {
     stream: TcpStream,
@@ -32,9 +33,22 @@ impl ThreadedConnectionHandler {
         // If something was received from the stream, decode it and print the command
         if bytes > 0 {
             let decoded: String = ThreadedConnectionHandler::decode(bytes, &mut buffer).unwrap();
-            println!("Got command: {}", decoded);
+            println!("Received command from client {}: {}", self.connection_number, decoded);
+
+            if decoded == "GetDate" {
+                println!("Sending the date and time to the client!");
+                self.getDate();
+            }
         }
+
         true
+    }
+
+    fn getDate(&mut self) {
+        let currentDateTimeText = DateTimeService::getDateAndTime();
+        let mut buffer = [0u8; 100];
+        let _length = ThreadedConnectionHandler::encode(currentDateTimeText, &mut buffer);
+        let _ = self.send(&mut buffer);
     }
 
     // Closes the TCP Stream
